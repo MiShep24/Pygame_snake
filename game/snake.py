@@ -123,6 +123,9 @@ class InfoMessage(object):
             self.add_form(frame_thickness)
         self.write_text()
 
+    def change_text(self, new_str):
+        self.text_message = new_str
+
 
 class Fruit(object):
 
@@ -147,6 +150,8 @@ snake = Snake(yellow, black, segment_size, head_x, head_y)
 fruit = Fruit(steelblue, segment_size)
 fruit_x, fruit_y = fruit.generate_random_position()
 
+score = InfoMessage("Score: " + str(count_segments_snake-1), red, "None", 50, width - 200, 20, 0, 0, white, black, 0, 0)
+
 run = True
 while run:
     if not snake.check_valid():
@@ -167,6 +172,7 @@ while run:
 
     snake.movement()
     snake.drawing()
+    score.set_message(False, 0)
 
     fruit.draw_fruit(fruit_x, fruit_y)
     head_x, head_y = snake.get_position()
@@ -174,16 +180,17 @@ while run:
         fruit_x, fruit_y = fruit.generate_random_position()
         count_segments_snake += 1
         list_segments_snake.append([head_x, head_y])
+        score.change_text("Score: " + str(count_segments_snake-1))
 
-    print([head_x, head_y], list_segments_snake, len(list_segments_snake), count_segments_snake)
+#    print([head_x, head_y], list_segments_snake, len(list_segments_snake), count_segments_snake)
 
     if len(list_segments_snake) > 1:
         for i in reversed(range(1, len(list_segments_snake))):
             list_segments_snake[i] = list_segments_snake[i-1]
-        print(head_x, head_y)
+#        print(head_x, head_y)
         for i in list_segments_snake:
-            pygame.draw.rect(display, black, [i[0], i[1], segment_size - 1, segment_size - 1], 3)
-            pygame.draw.rect(display, yellow, [i[0], i[1], segment_size + 1, segment_size + 1])
+            pygame.draw.rect(display, yellow, [i[0], i[1], segment_size, segment_size])
+            pygame.draw.rect(display, black, [i[0], i[1], segment_size, segment_size], 3)
     list_segments_snake[0] = [head_x, head_y]
 
     for event in pygame.event.get():
