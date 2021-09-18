@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 
 pygame.init()
 
@@ -13,10 +14,14 @@ yellow = (173, 255, 47)
 black = (0, 0, 0)
 red = (213, 50, 80)
 white = (255, 255, 255)
+steelblue = (70, 130, 180)
 
 segment_size = 30
-head_x = width // 2
-head_y = height // 2
+head_x = width // 2 // segment_size * segment_size
+head_y = height // 2 // segment_size * segment_size
+
+list_segments_snake = [[head_x, head_y]]
+count_segments_snake = 1
 
 display = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Snake game')
@@ -76,6 +81,9 @@ class Snake(object):
             return False
         return True
 
+    def get_position(self):
+        return self.head_x, self.head_y
+
 
 class InfoMessage(object):
 
@@ -116,7 +124,28 @@ class InfoMessage(object):
         self.write_text()
 
 
+class Fruit(object):
+
+    def __init__(self, fruit_color, size):
+        self.fruit_color = fruit_color
+        self.pos_x = 0
+        self.pos_y = 0
+        self.size = size
+
+    def generate_random_position(self):
+        self.pos_x = random.randint(0, width - segment_size) // segment_size * segment_size
+        self.pos_y = random.randint(0, height - segment_size) // segment_size * segment_size
+        return self.pos_x, self.pos_y
+
+    def draw_fruit(self, pos_x, pos_y):
+        self.generate_random_position()
+        pygame.draw.rect(display, self.fruit_color, [pos_x, pos_y, self.size, self.size])
+
+
 snake = Snake(yellow, black, segment_size, head_x, head_y)
+
+fruit = Fruit(steelblue, segment_size)
+fruit_x, fruit_y = fruit.generate_random_position()
 
 run = True
 while run:
@@ -139,8 +168,26 @@ while run:
     snake.movement()
     snake.drawing()
 
+    fruit.draw_fruit(fruit_x, fruit_y)
+    head_x, head_y = snake.get_position()
+    if head_x == fruit_x and head_y == fruit_y:
+        fruit_x, fruit_y = fruit.generate_random_position()
+        count_segments_snake += 1
+        list_segments_snake.append([head_x, head_y])
+
+    print([head_x, head_y], list_segments_snake, len(list_segments_snake), count_segments_snake)
+
+    if len(list_segments_snake) > 1:
+        for i in reversed(range(1, len(list_segments_snake))):
+            list_segments_snake[i] = list_segments_snake[i-1]
+        print(head_x, head_y)
+        for i in list_segments_snake:
+            pygame.draw.rect(display, black, [i[0], i[1], segment_size - 1, segment_size - 1], 3)
+            pygame.draw.rect(display, yellow, [i[0], i[1], segment_size + 1, segment_size + 1])
+    list_segments_snake[0] = [head_x, head_y]
+
     for event in pygame.event.get():
-        print(event)
+#        print(event)
         if event.type == pygame.QUIT:
             run = False
         elif event.type == pygame.KEYDOWN:
